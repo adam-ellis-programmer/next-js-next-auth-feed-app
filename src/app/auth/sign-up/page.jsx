@@ -1,14 +1,17 @@
 'use client'
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/utils/supabase'
 
 const SignUp = () => {
+  const router = useRouter()
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    firstName: 'sasha',
+    lastName: 'smith',
+    email: 'sasha.smith@gmail.com',
+    password: '11111111',
+    confirmPassword: '11111111',
   })
 
   const [errors, setErrors] = useState({})
@@ -91,12 +94,32 @@ const SignUp = () => {
       const data = await response.json()
 
       if (response.ok) {
-        // Success - redirect or show success message
-        alert(
-          'Account created successfully! Please check your email to verify.'
-        )
-        // Redirect to login or dashboard
-        // router.push('/login')
+        // After successful signup, sign in the user
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        })
+
+        if (signInError) {
+          setErrors({
+            submit:
+              'Account created but sign-in failed. Please sign in manually.',
+          })
+        } else {
+          alert('Account created successfully! Redirecting to dashboard...')
+
+          // Reset form
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+          })
+
+          // Redirect to dashboard
+          router.push('/auth/dashboard')
+        }
       } else {
         // Handle API errors
         setErrors({ submit: data.error || 'Failed to create account' })
@@ -108,7 +131,7 @@ const SignUp = () => {
     }
   }
 
-  return ( 
+  return (
     <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 mt-10'>
       <div className='max-w-md w-full space-y-8'>
         {/* Header */}

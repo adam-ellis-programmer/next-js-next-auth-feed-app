@@ -3,7 +3,7 @@ import './globals.css'
 import Navbar from '@/components/navbar/Navbar'
 import Container from '@/components/global/Container'
 import { Exo_2 } from 'next/font/google'
-
+import { AuthProvider } from '@/context/AuthContext'
 const exo2 = Exo_2({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
       <body className={`${exo2.className} antialiased`}>
         <Navbar />
         <Container className=' h-screen max-w-[1200px] mx-auto '>
-          {children}
+          <AuthProvider>{children}</AuthProvider>
         </Container>
       </body>
     </html>
