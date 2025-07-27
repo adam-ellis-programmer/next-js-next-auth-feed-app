@@ -108,8 +108,8 @@ const SignUp = () => {
     }
   }
 
-  return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4'>
+  return ( 
+    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 mt-10'>
       <div className='max-w-md w-full space-y-8'>
         {/* Header */}
         <div className='text-center'>
@@ -309,7 +309,7 @@ const SignUp = () => {
             <p className='text-gray-600'>
               Already have an account?{' '}
               <Link
-                href='/login'
+                href='/auth/sign-in'
                 className='text-blue-600 hover:text-blue-700 font-medium'
               >
                 Sign in here
