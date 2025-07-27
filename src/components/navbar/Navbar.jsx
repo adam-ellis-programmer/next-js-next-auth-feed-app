@@ -1,0 +1,48 @@
+import Link from 'next/link'
+import React from 'react'
+
+const Navbar = () => {
+  return (
+    <div className='h-[100px] shadow-2xl flex items-center justify-between px-6'>
+      {/* Logo/Brand */}
+      <div>
+        <Link
+          href='/'
+          className='text-2xl font-bold text-blue-600 hover:text-blue-800'
+        >
+          FeedApp
+        </Link>
+      </div>
+
+      {/* Navigation Links */}
+      <div className='flex space-x-6'>
+        <Link
+          href='/'
+          className='text-gray-700 hover:text-blue-600 font-medium transition-colors'
+        >
+          Home
+        </Link>
+        <Link
+          href='/posts'
+          className='text-gray-700 hover:text-blue-600 font-medium transition-colors'
+        >
+          Posts
+        </Link>
+        <Link
+          href='/feed'
+          className='text-gray-700 hover:text-blue-600 font-medium transition-colors'
+        >
+          Feed
+        </Link>
+        <Link
+          href='/posts/create'
+          className='bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors'
+        >
+          Create Post
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+export default Navbar
