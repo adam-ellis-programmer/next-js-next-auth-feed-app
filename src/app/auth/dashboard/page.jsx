@@ -33,7 +33,7 @@ const DashBoard = () => {
             <h1 className='text-3xl font-bold text-gray-900'>Dashboard</h1>
             <button
               onClick={signOut}
-              className='bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors'
+              className='bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors cursor-pointer'
             >
               Sign Out
             </button>

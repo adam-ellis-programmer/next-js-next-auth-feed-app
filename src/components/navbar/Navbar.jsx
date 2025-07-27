@@ -22,6 +22,13 @@ const Navbar = () => {
         >
           Home
         </Link>
+
+        <Link
+          href='/auth/dashboard'
+          className='text-gray-700 hover:text-blue-600 font-medium transition-colors'
+        >
+          Dash
+        </Link>
         <Link
           href='/posts'
           className='text-gray-700 hover:text-blue-600 font-medium transition-colors'
