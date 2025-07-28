@@ -1,10 +1,13 @@
 'use client'
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/utils/supabase'
+import { useAuth } from '@/context/AuthContext'
 
 const CreatePost = () => {
   const router = useRouter()
   const fileInputRef = useRef(null)
+  const { user } = useAuth()
 
   const [formData, setFormData] = useState({
     content: '',
@@ -131,6 +134,13 @@ const CreatePost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    // Check if user is authenticated
+    if (!user) {
+      setErrors({ submit: 'Please sign in to create a post' })
+      router.push('/auth/sign-in')
+      return
+    }
+
     const newErrors = validateForm()
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -148,13 +158,21 @@ const CreatePost = () => {
         formDataToSend.append('image', formData.image)
       }
 
-      // Get auth token (you might handle this differently)
-      const token = localStorage.getItem('authToken')
+      // Get current session token
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        setErrors({ submit: 'Please sign in to create a post' })
+        router.push('/auth/sign-in')
+        return
+      }
 
       const response = await fetch('/api/posts/create', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: formDataToSend,
       })
@@ -213,10 +231,9 @@ const CreatePost = () => {
                 errors.content ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder='Share your thoughts, experiences, or anything interesting! 🌟
-
-Use emojis to make your post more engaging 😊
-Add hashtags like #photography #nature #life
-Ask questions to start conversations 💬'
+              Use emojis to make your post more engaging 😊
+              Add hashtags like #photography #nature #life
+              Ask questions to start conversations 💬'
             />
 
             {/* Character Count */}
