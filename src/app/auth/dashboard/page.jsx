@@ -7,6 +7,8 @@ const DashBoard = () => {
   const { user, loading, signOut, isAuthenticated } = useAuth()
   const router = useRouter()
 
+  // console.log('user from auth on dashboard--->',user)
+
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/auth/sign-in')

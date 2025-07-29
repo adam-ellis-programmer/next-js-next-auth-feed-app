@@ -4,15 +4,18 @@ import { supabase } from '@/utils/supabase'
 
 const AuthContext = createContext({})
 
-// custom hook
+// custom hook --- so we can easyly access the VALUE object below
+// other wise we would need to repeat these lines many times to extract these values 
 export const useAuth = () => {
   const context = useContext(AuthContext)
+  // console.log(context)
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }
 
+// imported into main.jsx
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -29,9 +32,8 @@ export const AuthProvider = ({ children }) => {
     getInitialSession()
 
     // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // prettier-ignore
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
@@ -42,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     await supabase.auth.signOut()
   }
-  console.log(user)
+  // console.log(user)
 
   const value = {
     user,

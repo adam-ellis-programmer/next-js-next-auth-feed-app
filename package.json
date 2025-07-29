@@ -1,17 +1,23 @@
 {
   "name": "my-feed-app",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node src/seed/index.js",
+    "seed:posts": "node src/seed/index.js posts",
+    "seed:clear": "node src/seed/index.js clear",
+    "seed:reset": "node src/seed/index.js reset"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
     "@supabase/supabase-js": "^2.52.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.1",
     "next": "15.4.4",
     "prisma": "^6.12.0",
     "react": "19.1.0",

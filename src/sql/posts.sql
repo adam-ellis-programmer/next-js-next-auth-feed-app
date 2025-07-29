@@ -1,7 +1,7 @@
 -- Create posts table
 CREATE TABLE posts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,  -- ← Changed from auth.users(id) to users(id)
   content TEXT NOT NULL,
   image_url TEXT,
   image_path TEXT, -- Store the storage path for deletion
@@ -16,8 +16,8 @@ CREATE TABLE posts (
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for posts
--- Anyone can view posts
-CREATE POLICY "Posts are viewable by everyone" 
+-- Anyone can view posts (public feed)
+CREATE POLICY "Anyone can view posts" 
 ON posts FOR SELECT USING (true);
 
 -- Users can create posts (must be authenticated)
@@ -32,7 +32,7 @@ ON posts FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own posts" 
 ON posts FOR DELETE USING (auth.uid() = user_id);
 
--- Create index for better performance
+-- Create indexes for better performance
 CREATE INDEX idx_posts_user_id ON posts(user_id);
 CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
 
@@ -48,3 +48,11 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_posts_updated_at 
 BEFORE UPDATE ON posts 
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+
+-- Specifies WHEN to call the function:
+
+-- BEFORE UPDATE = before row is updated
+-- AFTER INSERT = after row is inserted
+-- ON posts = only for the posts table
+-- FOR EACH ROW = run once per affected row

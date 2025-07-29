@@ -1,17 +1,30 @@
 'use client'
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/utils/supabase'
+import { useAuth } from '@/context/AuthContext'
 
 const Login = () => {
+  const router = useRouter()
+  const { user } = useAuth()
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'sasha.smith@gmail.com',
+    password: '11111111',
   })
 
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      router.push('/auth/dashboard')
+    }
+  }, [user, router])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -58,40 +71,48 @@ const Login = () => {
     setErrors({}) // Clear any previous errors
 
     try {
-      // API call to authenticate user
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          rememberMe: rememberMe,
-        }),
+      // Sign in directly with Supabase (simpler approach)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       })
 
-      const data = await response.json()
+      console.log('data logged---->', data)
 
-      if (response.ok) {
-        // Success - store token and redirect
-        if (data.token) {
-          // Store JWT token (you might use a different approach)
-          localStorage.setItem('authToken', data.token)
-        }
+      if (error) {
+        console.error('Sign in error:', error)
 
-        // Redirect to dashboard/feed
-        window.location.href = '/feed'
-        // Or use router: router.push('/feed')
-      } else {
-        // Handle API errors
-        if (response.status === 401) {
+        // Handle specific error cases
+        if (error.message.includes('Invalid login credentials')) {
           setErrors({ submit: 'Invalid email or password' })
+        } else if (error.message.includes('Email not confirmed')) {
+          setErrors({
+            submit:
+              'Please check your email and click the confirmation link before signing in',
+          })
         } else {
-          setErrors({ submit: data.error || 'Login failed. Please try again.' })
+          setErrors({ submit: error.message })
         }
+        return
+      }
+
+      if (data.user && data.session) {
+        // Success! The AuthContext will automatically detect the sign-in
+        // and update the user state through onAuthStateChange
+
+        // Clear form
+        setFormData({
+          email: '',
+          password: '',
+        })
+
+        // Redirect to dashboard
+        router.push('/auth/dashboard')
+      } else {
+        setErrors({ submit: 'Authentication failed. Please try again.' })
       }
     } catch (error) {
+      console.error('Login error:', error)
       setErrors({
         submit: 'Network error. Please check your connection and try again.',
       })
@@ -100,9 +121,33 @@ const Login = () => {
     }
   }
 
-  const handleForgotPassword = () => {
-    // Handle forgot password logic
-    alert('Forgot password functionality would be implemented here')
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      alert('Please enter your email address first')
+      return
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        formData.email,
+        {
+          redirectTo: `${window.location.origin}/auth/reset-password`,
+        }
+      )
+
+      if (error) {
+        alert('Error: ' + error.message)
+      } else {
+        alert('Password reset email sent! Check your inbox.')
+      }
+    } catch (error) {
+      alert('Error sending reset email. Please try again.')
+    }
+  }
+
+  // Don't render if user is already logged in
+  if (user) {
+    return null
   }
 
   return (
@@ -301,14 +346,14 @@ const Login = () => {
         {/* Demo Accounts */}
         <div className='bg-blue-50 border border-blue-200 rounded-md p-4'>
           <h3 className='text-sm font-medium text-blue-800 mb-2'>
-            Demo Accounts
+            Demo Account
           </h3>
           <div className='text-xs text-blue-700 space-y-1'>
             <p>
-              <strong>User:</strong> demo@example.com / password123
+              <strong>Email:</strong> sasha.smith@gmail.com
             </p>
             <p>
-              <strong>Admin:</strong> admin@example.com / admin123
+              <strong>Password:</strong> 11111111
             </p>
           </div>
         </div>
