@@ -88,7 +88,7 @@ export default async function Feed() {
         <div className=" mt-10 px-6 ">
           <div className="h-full">
             {/* Posts Feed - Scroll Container for Intersection Observer */}
-            <div className="h-[590px] overflow-y-auto space-y-4 p-4 rounded-2xl bg-white/20 backdrop-blur-sm border border-gray-200/50" id="feed-container">
+            <div className="h-[599px] overflow-y-auto space-y-4 p-4 rounded-2xl bg-white/20 backdrop-blur-sm border border-gray-200/50" id="feed-container">
               {posts.map((post) => (
                 <div 
                   key={post.id} 
