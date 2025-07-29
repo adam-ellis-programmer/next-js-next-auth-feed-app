@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body className={`${exo2.className} antialiased`}>
         <Navbar />
-        <Container className=' h-screen max-w-[1200px] mx-auto '>
+        <Container className=' h-screen max-w-[1400px] mx-auto '>
           <AuthProvider>{children}</AuthProvider>
         </Container>
       </body>
