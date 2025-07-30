@@ -1,4 +1,4 @@
-// app/feed/page.jsx - Complete Hybrid Approach
+// app/feed/page.jsx - Client Component Version
 'use client'
 import { useState, useEffect } from 'react'
 import { PostCard } from '@/components/posts/PostCard'
@@ -10,22 +10,18 @@ export default function Feed() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Use direct database call instead of API route
+  // Fetch initial posts on component mount
   useEffect(() => {
     const fetchInitialPosts = async () => {
       try {
         setLoading(true)
+        const response = await fetch('/api/posts?offset=0&limit=20')
 
-        // Import getPosts directly (works in client components too)
-        // This runs AFTER the component has mounted and rendered
-        const { getPosts } = await import('@/lib/data')
-        // Is equivalent to:
-        // 1. Load the module dynamically
-        // 2. Execute the module code in browser context
-        // 3. Extract the getPosts function
-        // 4. getPosts now has access to browser environment
-        const posts = await getPosts(0, 20)
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts')
+        }
 
+        const posts = await response.json()
         setInitialPosts(posts)
       } catch (err) {
         setError(err.message)
@@ -118,7 +114,7 @@ export default function Feed() {
     )
   }
 
-  // Main content - COMPLETE layout from your server component
+  // Main content - your existing layout
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 mt-5'>
       {/* Sticky Header */}
@@ -194,12 +190,12 @@ export default function Feed() {
         {/* Left Side - Feed */}
         <div className='mt-10 px-6'>
           <div className='h-full'>
-            {/* Feed Container with Infinite Scroll */}
+            {/* Your existing FeedContainer with infinite scroll */}
             <FeedContainer initialPosts={initialPosts} />
           </div>
         </div>
 
-        {/* Right Side - Stats and Filters - COMPLETE VERSION */}
+        {/* Right Side - Stats and Filters */}
         <div className='p-6 mt-10 grid lg:grid-cols-3 gap-4'>
           {/* Quick Stats */}
           <div className='mb-8'>
@@ -241,7 +237,6 @@ export default function Feed() {
             <h3 className='text-lg font-bold text-gray-900 mb-4'>
               Filter & Sort
             </h3>
-
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm text-gray-600 mb-2'>
@@ -254,7 +249,6 @@ export default function Feed() {
                   <option>Oldest</option>
                 </select>
               </div>
-
               <div>
                 <label className='block text-sm text-gray-600 mb-2'>
                   Content Type:
@@ -279,7 +273,6 @@ export default function Feed() {
             <h3 className='text-lg font-bold text-gray-900 mb-4'>
               Quick Actions
             </h3>
-
             <div className='space-y-3'>
               <Link
                 href='/posts/create'
@@ -287,11 +280,12 @@ export default function Feed() {
               >
                 Create New Post
               </Link>
-
-              <button className='w-full bg-white/60 backdrop-blur-sm border border-gray-200/50 text-gray-700 px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-white/80'>
+              <button
+                onClick={() => window.location.reload()}
+                className='w-full bg-white/60 backdrop-blur-sm border border-gray-200/50 text-gray-700 px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-white/80'
+              >
                 Refresh Feed
               </button>
-
               <button className='w-full bg-white/60 backdrop-blur-sm border border-gray-200/50 text-gray-700 px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-white/80'>
                 Mark All Read
               </button>
