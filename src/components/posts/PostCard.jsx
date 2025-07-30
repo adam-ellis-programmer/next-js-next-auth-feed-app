@@ -1,6 +1,8 @@
+// components/posts/PostCard.jsx
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Comments from './Comments'
+import LazyImage from '@/components/common/LazyImage'
 
 export const PostCard = ({ post }) => {
   const [reactions, setReactions] = useState(
@@ -16,6 +18,12 @@ export const PostCard = ({ post }) => {
 
   const [userReaction, setUserReaction] = useState(null)
   const [showComments, setShowComments] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Fix hydration mismatch by ensuring client-side rendering
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const handleReaction = async (reactionType) => {
     try {
@@ -59,6 +67,14 @@ export const PostCard = ({ post }) => {
     }
   }
 
+  // Handle image view tracking (for future analytics)
+  const handleImageView = ({ src, alt }) => {
+    // You can implement view tracking here
+    console.log(`Image viewed: ${post.id}`)
+    // Example: Track in analytics service
+    // analytics.track('post_image_viewed', { postId: post.id, imageUrl: src })
+  }
+
   const reactionButtons = [
     { type: 'like', emoji: '👍', label: 'Like' },
     { type: 'love', emoji: '❤️', label: 'Love' },
@@ -68,16 +84,50 @@ export const PostCard = ({ post }) => {
     { type: 'angry', emoji: '😡', label: 'Angry' },
   ]
 
+  // Format date consistently for server and client
+  const formatDate = (dateString) => {
+    if (!isClient) return '' // Return empty string during SSR
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
   return (
-    <article className='rounded-2xl h-auto mb-7 shadow-2xl bg-white relative'>
-      <img
-        src={post.image_url}
-        className='h-60 w-full object-cover rounded-tl-2xl rounded-tr-2xl'
-        alt=''
-      />
+    <article className='rounded-2xl h-auto mb-7 shadow-2xl bg-white relative overflow-hidden'>
+      {/* Lazy-loaded image */}
+      <div className='h-60 w-full relative'>
+        <LazyImage
+          src={post.image_url}
+          alt={`Post by ${post.author?.username || 'User'}`}
+          className='h-60 w-full object-cover rounded-tl-2xl rounded-tr-2xl'
+          onView={handleImageView}
+          threshold={0.1}
+          rootMargin='100px'
+          rootSelector='#feed-container' // Pass selector instead of element
+        />
+      </div>
 
       {/* Post Content */}
       <div className='p-4'>
+        {/* Author info (if available) */}
+        {post.author && (
+          <div className='flex items-center mb-3 pb-2 border-b border-gray-100'>
+            <div className='w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3'>
+              {post.author.first_name?.[0] || post.author.username?.[0] || 'U'}
+            </div>
+            <div>
+              <p className='font-medium text-gray-900 text-sm'>
+                {post.author.full_name || post.author.username}
+              </p>
+              <p className='text-xs text-gray-500'>
+                {formatDate(post.created_at)}
+              </p>
+            </div>
+          </div>
+        )}
+
         <p className='text-gray-800 mb-3'>{post.content}</p>
 
         {/* Reaction Counts */}
