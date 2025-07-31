@@ -2,17 +2,31 @@
 'use client'
 import { useState } from 'react'
 
-const BulkActions = ({ selectedCount, onDelete, onUpdate, loading }) => {
+const BulkActions = ({
+  selectedCount,
+  onDelete,
+  onUpdate,
+  loading,
+  // selected posts here for testing
+  selectedPosts,
+}) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
 
+  // First flip: "I'm going to turn on, but let me warn you first" (shows confirmation)
+  // Second flip: "You've confirmed, now I'll actually turn on" (performs action)
   const handleDelete = () => {
     if (showDeleteConfirm) {
       onDelete()
       setShowDeleteConfirm(false)
     } else {
+      // first click flips this on - then the nex time we click handle delete
+      // the condition is true so it runs the first block not this one
+      // State persists across re-renders, so next click will execute the if block.
       setShowDeleteConfirm(true)
     }
+    console.log('--- bulk actions component ---')
+    console.log(selectedPosts)
   }
 
   const handleUpdate = (updates) => {

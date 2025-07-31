@@ -1,5 +1,8 @@
 // next.config.mjs - Your exact configuration
 /** @type {import('next').NextConfig} */
+
+// More restrictive (*) = More secure, but might break if your file structure changes
+// More permissive (**) = More flexible, but allows deeper access
 const nextConfig = {
   images: {
     remotePatterns: [

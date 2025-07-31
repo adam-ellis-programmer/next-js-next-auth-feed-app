@@ -65,6 +65,7 @@ const PostsPage = () => {
     if (isSelected) {
       setSelectedPosts((prev) => [...prev, postId])
     } else {
+      // Give me a new list without this ID
       setSelectedPosts((prev) => prev.filter((id) => id !== postId))
     }
   }
@@ -80,9 +81,11 @@ const PostsPage = () => {
 
   // Handle bulk delete
   const handleBulkDelete = async () => {
+    console.log('---- posts page ')
+    console.log(selectedPosts)
     if (selectedPosts.length === 0) return
-
     setBulkLoading(true)
+
     try {
       const response = await fetch('/api/posts/bulk', {
         method: 'DELETE',
@@ -208,6 +211,7 @@ const PostsPage = () => {
         {selectedPosts.length > 0 && (
           <div className='mb-6'>
             <BulkActions
+              selectedPosts={selectedPosts}
               selectedCount={selectedPosts.length}
               onDelete={handleBulkDelete}
               onUpdate={handleBulkUpdate}

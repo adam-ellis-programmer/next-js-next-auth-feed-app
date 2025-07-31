@@ -156,8 +156,10 @@ export const bulkDeletePosts = async (postIds, userId) => {
     const { error } = await supabase
       .from('posts')
       .delete()
-      .in('id', postIds)
-      .eq('user_id', userId) // Security: only delete user's own posts
+      //  Find all posts where the id field matches ANY value in the postIds array
+      .in('id', postIds) // WHERE id is IN this array of IDs
+      // SQL equivalent: AND user_id = 'current-user-id'
+      .eq('user_id', userId) // equal: ---> Security: only delete user's own posts
 
     if (error) throw error
     return { success: true }
