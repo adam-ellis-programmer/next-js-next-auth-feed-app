@@ -11,10 +11,11 @@ import { supabase } from '@/utils/supabase'
 // This should be much faster with your existing indexes
 // lib/data.js - Go back to the original approach (now that RLS is disabled)
 
+// offset is start index
 export const getPosts = cache(async (offset = 0, limit = 20) => {
   const startTime = Date.now()
   console.log(`🔍 Starting getPosts query (offset: ${offset}, limit: ${limit})`)
-
+  const end = offset + limit - 1 // Ending position (inclusive)
   try {
     const { data: posts, error } = await supabase
       .from('posts')
@@ -33,7 +34,7 @@ export const getPosts = cache(async (offset = 0, limit = 20) => {
       `
       )
       .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+      .range(offset, end)
 
     const endTime = Date.now()
     console.log(`✅ getPosts completed in ${endTime - startTime}ms`)
@@ -94,6 +95,11 @@ export const trackPostView = async (postId, userId = null) => {
 export const getUserPosts = cache(async (userId, page = 1, limit = 10) => {
   const startTime = Date.now()
   const offset = (page - 1) * limit
+  // Page 1: offset = (1-1) * 10 = 0  → Start at position 0
+  // Page 2: offset = (2-1) * 10 = 10 → Start at position 10
+  // Page 3: offset = (3-1) * 10 = 20 → Start at position 20
+  const start = offset // Ending position (inclusive)
+  const end = offset + limit - 1
 
   console.log(
     `🔍 Starting getUserPosts query (userId: ${userId}, page: ${page}, limit: ${limit})`
@@ -118,7 +124,7 @@ export const getUserPosts = cache(async (userId, page = 1, limit = 10) => {
       )
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+      .range(start, end)
 
     const endTime = Date.now()
     console.log(`✅ getUserPosts completed in ${endTime - startTime}ms`)

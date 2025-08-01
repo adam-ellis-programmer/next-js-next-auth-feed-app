@@ -32,11 +32,13 @@ const PostsPage = () => {
         `/api/posts/user?userId=${user.id}&page=${page}&limit=${pagination.limit}`
       )
 
+      
       if (!response.ok) {
         throw new Error('Failed to fetch posts')
       }
-
+      
       const data = await response.json()
+      console.log('data----->', data)
       setPosts(data.posts)
       setPagination(data.pagination)
     } catch (err) {
