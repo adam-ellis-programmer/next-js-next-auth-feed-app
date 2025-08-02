@@ -191,3 +191,137 @@ export const bulkUpdatePosts = async (postIds, updates, userId) => {
     return { success: false, error: error.message }
   }
 }
+
+// ===================================================
+// USER PROFILE FUNCTIONS
+// ===================================================
+
+// Get user profile by ID with caching
+export const getUserProfile = cache(async (userId) => {
+  const startTime = Date.now()
+  console.log(`🔍 Starting getUserProfile query (userId: ${userId})`)
+
+  try {
+    const { data: profile, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    const endTime = Date.now()
+    console.log(`✅ getUserProfile completed in ${endTime - startTime}ms`)
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned
+        console.log(`📭 No profile found for user ${userId}`)
+        return null
+      }
+      throw error
+    }
+
+    console.log(
+      `👤 Retrieved profile for ${profile.full_name || profile.email}`
+    )
+    return profile
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ getUserProfile failed in ${endTime - startTime}ms`)
+    console.error('Error fetching user profile:', error)
+    return null
+  }
+})
+
+// Get user profile by email (useful for demo user checks)
+export const getUserProfileByEmail = cache(async (email) => {
+  const startTime = Date.now()
+  console.log(`🔍 Starting getUserProfileByEmail query (email: ${email})`)
+
+  try {
+    const { data: profile, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single()
+
+    const endTime = Date.now()
+    console.log(
+      `✅ getUserProfileByEmail completed in ${endTime - startTime}ms`
+    )
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        console.log(`📭 No profile found for email ${email}`)
+        return null
+      }
+      throw error
+    }
+
+    console.log(
+      `👤 Retrieved profile for ${profile.full_name || profile.email}`
+    )
+    return profile
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ getUserProfileByEmail failed in ${endTime - startTime}ms`)
+    console.error('Error fetching user profile by email:', error)
+    return null
+  }
+})
+
+// Update user profile
+export const updateUserProfile = async (userId, updates) => {
+  const startTime = Date.now()
+  console.log(`🔄 Starting updateUserProfile (userId: ${userId})`)
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select()
+      .single()
+
+    const endTime = Date.now()
+    console.log(`✅ updateUserProfile completed in ${endTime - startTime}ms`)
+
+    if (error) throw error
+    return { success: true, data }
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ updateUserProfile failed in ${endTime - startTime}ms`)
+    console.error('Error updating user profile:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+// Check if user is demo user (helper function)
+export const checkIsDemoUser = async (userId) => {
+  try {
+    const profile = await getUserProfile(userId)
+    return profile?.demo_user === true
+  } catch (error) {
+    console.error('Error checking demo user status:', error)
+    return false
+  }
+}
+
+// Get all demo users (admin function)
+export const getDemoUsers = cache(async () => {
+  try {
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('demo_user', true)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return users || []
+  } catch (error) {
+    console.error('Error fetching demo users:', error)
+    return []
+  }
+})

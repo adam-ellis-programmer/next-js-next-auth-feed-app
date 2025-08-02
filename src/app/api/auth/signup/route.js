@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request) {
   try {
-    const { firstName, lastName, email, password } = await request.json()
+    const { firstName, lastName, email, password, demo_user } =
+      await request.json()
 
     // Validate required fields
     if (!firstName || !lastName || !email || !password) {
@@ -39,6 +40,7 @@ export async function POST(request) {
           first_name: firstName,
           last_name: lastName,
           full_name: `${firstName} ${lastName}`,
+          demo_user,
         },
       },
     })
@@ -58,6 +60,7 @@ export async function POST(request) {
         full_name: `${firstName} ${lastName}`,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        demo_user,
       })
 
       if (profileError) {

@@ -12,17 +12,21 @@ const SignUp = () => {
     email: 'sasha.smith@gmail.com',
     password: '11111111',
     confirmPassword: '11111111',
+    demo_user: false,
   })
+
+  // Fixed: Access the boolean value from formData, not an undefined variable
+  console.log('demo_user', formData.demo_user)
 
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
 
     // Clear error when user starts typing
@@ -75,6 +79,8 @@ const SignUp = () => {
     }
 
     setIsLoading(true)
+    // Fixed: Access the boolean value from formData
+    console.log('demo_user', formData.demo_user)
 
     try {
       // API call to create user
@@ -88,6 +94,7 @@ const SignUp = () => {
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
+          demo_user: formData.demo_user, // demo user flag
         }),
       })
 
@@ -115,6 +122,7 @@ const SignUp = () => {
             email: '',
             password: '',
             confirmPassword: '',
+            demo_user: false,
           })
 
           // Redirect to dashboard
@@ -281,6 +289,39 @@ const SignUp = () => {
             )}
           </div>
 
+          {/* Demo User Checkbox */}
+          <div className='flex items-start space-x-3 p-4 bg-blue-50 border border-blue-200 rounded-lg'>
+            <div className='flex items-center h-5'>
+              <input
+                type='checkbox'
+                id='demo_user'
+                name='demo_user'
+                checked={formData.demo_user}
+                onChange={handleChange}
+                className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2'
+              />
+            </div>
+            <div className='flex-1'>
+              <label
+                htmlFor='demo_user'
+                className='text-sm font-medium text-gray-900 cursor-pointer'
+              >
+                Create as Demo User
+              </label>
+              <p className='text-xs text-gray-600 mt-1'>
+                Demo users have limited features and can explore the platform
+                with sample data. Perfect for trying out the app without
+                committing to a full account.
+              </p>
+              {formData.demo_user && (
+                <div className='mt-2 flex items-center text-xs text-blue-600'>
+                  <span className='mr-1'>ℹ️</span>
+                  Demo account selected - you can upgrade later
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Submit Error */}
           {errors.submit && (
             <div className='bg-red-50 border border-red-200 rounded-md p-3'>
@@ -295,6 +336,8 @@ const SignUp = () => {
             className={`w-full py-2 px-4 rounded-md text-white font-medium transition-colors ${
               isLoading
                 ? 'bg-gray-400 cursor-not-allowed'
+                : formData.demo_user
+                ? 'bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
             }`}
           >
@@ -320,10 +363,10 @@ const SignUp = () => {
                     d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                   ></path>
                 </svg>
-                Creating account...
+                Creating {formData.demo_user ? 'demo ' : ''}account...
               </span>
             ) : (
-              'Create Account'
+              `Create ${formData.demo_user ? 'Demo ' : ''}Account`
             )}
           </button>
 

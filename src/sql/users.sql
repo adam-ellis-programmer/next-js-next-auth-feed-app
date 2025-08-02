@@ -5,6 +5,7 @@ CREATE TABLE users (
   full_name TEXT,
   avatar_url TEXT,
   bio TEXT,
+  demo_user BOOLEAN DEFAULT FALSE,  
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
