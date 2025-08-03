@@ -2,7 +2,7 @@
 import { createContext, useContext, useState } from 'react'
 
 const AlertContext = createContext({})
-// console.log(AlertContext)
+
 export const useAlert = () => {
   const context = useContext(AlertContext)
   if (!context) {
@@ -20,7 +20,7 @@ export const AlertProvider = ({ children }) => {
 
   const showAlert = (message, type = 'error', duration = 5000) => {
     setAlert({
-      show: false,
+      show: true, // ← FIXED: This was set to false!
       message,
       type,
     })

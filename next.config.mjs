@@ -9,7 +9,7 @@ const nextConfig = {
       // Unsplash images (for your existing seed data)
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
+        hostname: '*.unsplash.com',
         port: '',
         pathname: '/**',
       },

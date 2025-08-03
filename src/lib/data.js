@@ -325,3 +325,150 @@ export const getDemoUsers = cache(async () => {
     return []
   }
 })
+
+// ================================================
+// VIEW / EDIT FUNTIONS
+// ================================================
+
+// Add these functions to your existing lib/data.js file
+
+// Get single post by ID (for view page)
+export const getPostById = cache(async (postId) => {
+  const startTime = Date.now()
+  console.log(`🔍 Starting getPostById query (postId: ${postId})`)
+
+  try {
+    const { data: post, error } = await supabase
+      .from('posts')
+      .select(
+        `
+        *,
+        author:user_id (
+          id,
+          username,
+          full_name,
+          avatar_url,
+          first_name,
+          last_name,
+          email
+        )
+      `
+      )
+      .eq('id', postId)
+      .single()
+
+    const endTime = Date.now()
+    console.log(`✅ getPostById completed in ${endTime - startTime}ms`)
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        console.log(`📭 No post found with ID ${postId}`)
+        return null
+      }
+      throw error
+    }
+
+    console.log(`📄 Retrieved post: ${post.content.substring(0, 50)}...`)
+    return post
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ getPostById failed in ${endTime - startTime}ms`)
+    console.error('Error fetching post by ID:', error)
+    return null
+  }
+})
+
+// Get single post by ID for editing (includes ownership check)
+export const getPostForEdit = cache(async (postId, userId) => {
+  const startTime = Date.now()
+  console.log(
+    `🔍 Starting getPostForEdit query (postId: ${postId}, userId: ${userId})`
+  )
+
+  try {
+    const { data: post, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', postId)
+      .eq('user_id', userId) // Only get post if user owns it
+      .single()
+
+    const endTime = Date.now()
+    console.log(`✅ getPostForEdit completed in ${endTime - startTime}ms`)
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        console.log(
+          `📭 No editable post found with ID ${postId} for user ${userId}`
+        )
+        return null
+      }
+      throw error
+    }
+
+    console.log(
+      `✏️ Retrieved editable post: ${post.content.substring(0, 50)}...`
+    )
+    return post
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ getPostForEdit failed in ${endTime - startTime}ms`)
+    console.error('Error fetching post for edit:', error)
+    return null
+  }
+})
+
+// Update single post
+export const updatePost = async (postId, updates, userId) => {
+  const startTime = Date.now()
+  console.log(`🔄 Starting updatePost (postId: ${postId}, userId: ${userId})`)
+
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', postId)
+      .eq('user_id', userId) // Security: only update user's own posts
+      .select()
+      .single()
+
+    const endTime = Date.now()
+    console.log(`✅ updatePost completed in ${endTime - startTime}ms`)
+
+    if (error) throw error
+    return { success: true, data }
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ updatePost failed in ${endTime - startTime}ms`)
+    console.error('Error updating post:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+// Delete single post
+export const deletePost = async (postId, userId) => {
+  const startTime = Date.now()
+  console.log(`🗑️ Starting deletePost (postId: ${postId}, userId: ${userId})`)
+
+  try {
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', postId)
+      .eq('user_id', userId) // Security: only delete user's own posts
+
+    const endTime = Date.now()
+    console.log(`✅ deletePost completed in ${endTime - startTime}ms`)
+
+    if (error) throw error
+    return { success: true }
+  } catch (error) {
+    const endTime = Date.now()
+    console.log(`❌ deletePost failed in ${endTime - startTime}ms`)
+    console.error('Error deleting post:', error)
+    return { success: false, error: error.message }
+  }
+}
