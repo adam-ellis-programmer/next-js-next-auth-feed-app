@@ -38,7 +38,7 @@ const PostsPage = () => {
       }
       
       const data = await response.json()
-      console.log('data----->', data)
+      // console.log('data----->', data)
       setPosts(data.posts)
       setPagination(data.pagination)
     } catch (err) {
@@ -139,7 +139,7 @@ const PostsPage = () => {
       // Refresh the current page
       await fetchPosts(pagination.currentPage)
       setSelectedPosts([])
-
+      
       console.log(`Successfully updated ${selectedPosts.length} posts`)
     } catch (err) {
       console.error('Error updating posts:', err)

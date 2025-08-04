@@ -40,8 +40,8 @@ const PostsTable = ({ posts, selectedPosts, onPostSelect, onSelectAll }) => {
     let aValue = a[sortField]
     let bValue = b[sortField]
 
-    console.log('-- a value --', aValue)
-    console.log('-- a value --', bValue)
+    // console.log('-- a value --', aValue)
+    // console.log('-- b value --', bValue)
 
     // Handle date sorting
     if (sortField === 'created_at' || sortField === 'updated_at') {

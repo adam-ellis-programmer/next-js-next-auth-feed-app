@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const ViewPostPage = ({ params }) => {
+  // console.log('params---->', params)
   const router = useRouter()
   const { user } = useAuth()
   const resolvedParams = use(params) // Unwrap the params Promise

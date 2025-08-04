@@ -1,6 +1,8 @@
 // components/posts/BulkActions.jsx
 'use client'
 import { useState } from 'react'
+import { useDemoUser } from '@/hooks/demoUser'
+import { useAlert } from '@/context/AlertContext'
 
 const BulkActions = ({
   selectedCount,
@@ -13,14 +15,24 @@ const BulkActions = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
 
+  // Add demo user detection
+  const { isDemoUser, loading: demoLoading } = useDemoUser()
+  const { showDemoAlert } = useAlert()
+
   // First flip: "I'm going to turn on, but let me warn you first" (shows confirmation)
   // Second flip: "You've confirmed, now I'll actually turn on" (performs action)
   const handleDelete = () => {
+    // CHECK FOR DEMO USER - Block demo users from deleting
+    if (isDemoUser) {
+      showDemoAlert()
+      return
+    }
+
     if (showDeleteConfirm) {
       onDelete()
       setShowDeleteConfirm(false)
     } else {
-      // first click flips this on - then the nex time we click handle delete
+      // first click flips this on - then the next time we click handle delete
       // the condition is true so it runs the first block not this one
       // State persists across re-renders, so next click will execute the if block.
       setShowDeleteConfirm(true)
@@ -30,8 +42,24 @@ const BulkActions = ({
   }
 
   const handleUpdate = (updates) => {
+    // CHECK FOR DEMO USER - Block demo users from updating
+    if (isDemoUser) {
+      showDemoAlert()
+      return
+    }
+
     onUpdate(updates)
     setShowUpdateModal(false)
+  }
+
+  const handleUpdateModalOpen = () => {
+    // CHECK FOR DEMO USER - Block demo users from opening update modal
+    if (isDemoUser) {
+      showDemoAlert()
+      return
+    }
+
+    setShowUpdateModal(true)
   }
 
   return (
@@ -50,12 +78,17 @@ const BulkActions = ({
           <div className='flex items-center gap-3'>
             {/* Update Button */}
             <button
-              onClick={() => setShowUpdateModal(true)}
-              disabled={loading}
-              className='bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2'
+              onClick={handleUpdateModalOpen}
+              disabled={loading || demoLoading}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                isDemoUser
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={isDemoUser ? 'Demo users cannot update posts' : ''}
             >
-              {loading ? (
-                <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+              {loading || demoLoading ? (
+                <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin'></div>
               ) : (
                 <svg
                   className='w-4 h-4'
@@ -71,20 +104,23 @@ const BulkActions = ({
                   />
                 </svg>
               )}
-              Update
+              {isDemoUser ? 'Update Disabled' : 'Update'}
             </button>
 
             {/* Delete Button */}
             <button
               onClick={handleDelete}
-              disabled={loading}
+              disabled={loading || demoLoading}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                showDeleteConfirm
+                isDemoUser
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : showDeleteConfirm
                   ? 'bg-red-600 text-white hover:bg-red-700'
                   : 'bg-red-100 text-red-700 hover:bg-red-200'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={isDemoUser ? 'Demo users cannot delete posts' : ''}
             >
-              {loading ? (
+              {loading || demoLoading ? (
                 <div className='w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin'></div>
               ) : (
                 <svg
@@ -101,11 +137,15 @@ const BulkActions = ({
                   />
                 </svg>
               )}
-              {showDeleteConfirm ? 'Confirm Delete' : 'Delete'}
+              {isDemoUser
+                ? 'Delete Disabled'
+                : showDeleteConfirm
+                ? 'Confirm Delete'
+                : 'Delete'}
             </button>
 
             {/* Cancel Delete */}
-            {showDeleteConfirm && (
+            {showDeleteConfirm && !isDemoUser && (
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className='text-gray-600 hover:text-gray-800 px-3 py-2 text-sm'
@@ -116,8 +156,18 @@ const BulkActions = ({
           </div>
         </div>
 
+        {/* Demo User Notice */}
+        {isDemoUser && (
+          <div className='mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg'>
+            <p className='text-yellow-800 text-sm'>
+              ⚠️ Demo users cannot modify posts. Actions are disabled in demo
+              mode.
+            </p>
+          </div>
+        )}
+
         {/* Delete Warning */}
-        {showDeleteConfirm && (
+        {showDeleteConfirm && !isDemoUser && (
           <div className='mt-3 p-3 bg-red-50 border border-red-200 rounded-lg'>
             <p className='text-red-800 text-sm'>
               ⚠️ This action cannot be undone. Are you sure you want to delete{' '}
@@ -128,7 +178,7 @@ const BulkActions = ({
       </div>
 
       {/* Update Modal */}
-      {showUpdateModal && (
+      {showUpdateModal && !isDemoUser && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
           <div className='bg-white rounded-2xl p-6 max-w-md w-full'>
             <h3 className='text-lg font-bold text-gray-900 mb-4'>
