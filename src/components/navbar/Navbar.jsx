@@ -1,12 +1,22 @@
 'use client'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { links } from '@/lib/links'
 import { RxHamburgerMenu } from 'react-icons/rx'
 import MobileNav from './MobileNav'
 
 const Navbar = () => {
-  const [isNavOpen, setIsNavOpen] = useState(false)
+  const [isNavOpen, setIsNavOpen] = useState(true)
+
+  useEffect(() => {
+    if (isNavOpen) {
+      window.document.documentElement.classList.add('mobile-mode')
+    } else {
+      window.document.documentElement.classList.remove('mobile-mode')
+    }
+    return () => {}
+  }, [isNavOpen])
+
   // nav logic
   const onMobileClick = () => {
     setIsNavOpen(() => !isNavOpen)
@@ -55,7 +65,7 @@ const Navbar = () => {
           </Link>
         </div>
       </div>
-      {isNavOpen && <MobileNav />}
+      {isNavOpen && <MobileNav setIsNavOpen={setIsNavOpen} />}
     </nav>
   )
 }

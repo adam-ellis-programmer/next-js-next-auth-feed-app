@@ -18,3 +18,7 @@
     --foreground: #ededed;
   }
 }
+
+.mobile-mode {
+  overflow: hidden;
+}
