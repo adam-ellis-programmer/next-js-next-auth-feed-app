@@ -6,7 +6,7 @@ import { RxHamburgerMenu } from 'react-icons/rx'
 import MobileNav from './MobileNav'
 
 const Navbar = () => {
-  const [isNavOpen, setIsNavOpen] = useState(true)
+  const [isNavOpen, setIsNavOpen] = useState(false)
 
   useEffect(() => {
     if (isNavOpen) {
