@@ -3,9 +3,17 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/utils/supabase'
-
+import { useAuth } from '@/context/AuthContext'
 const SignUp = () => {
+  const { user } = useAuth()
   const router = useRouter()
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      router.push('/auth/dashboard')
+    }
+  }, [user, router])
+
   const [formData, setFormData] = useState({
     firstName: 'sasha',
     lastName: 'smith',
@@ -139,6 +147,10 @@ const SignUp = () => {
     }
   }
 
+  // Don't render if user is already logged in
+  if (user) {
+    return null
+  }
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 mt-10'>
       <div className='max-w-md w-full space-y-8'>
