@@ -1,6 +1,5 @@
 // components/pagination/MyPostsPagination.jsx
 'use client'
-import { useState, useEffect } from 'react'
 
 const MyPostsPagination = ({
   currentPage,
@@ -8,56 +7,24 @@ const MyPostsPagination = ({
   onPageChange,
   hasNext,
   hasPrev,
-  showPages = 7, // Number of page buttons to show on desktop
+  showPages = 7, // Number of page buttons to show
 }) => {
-  const [isMobile, setIsMobile] = useState(false)
-
-  // Detect screen size
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768) // md breakpoint
-    }
-
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
-
-  // Adjust showPages based on screen size
-  const getShowPages = () => {
-    if (isMobile) {
-      return window.innerWidth < 480 ? 3 : 5 // Show 3 on very small screens, 5 on small
-    }
-    return showPages
-  }
-
   // Generate page numbers to display
   const generatePageNumbers = () => {
     const pages = []
-    const pagesToShow = getShowPages()
-    const halfRange = Math.floor(pagesToShow / 2)
+    const halfRange = Math.floor(showPages / 2)
 
     let startPage = Math.max(1, currentPage - halfRange)
     let endPage = Math.min(totalPages, currentPage + halfRange)
 
     // Adjust if we're near the beginning
     if (currentPage <= halfRange) {
-      endPage = Math.min(totalPages, pagesToShow)
+      endPage = Math.min(totalPages, showPages)
     }
 
     // Adjust if we're near the end
     if (currentPage + halfRange >= totalPages) {
-      startPage = Math.max(1, totalPages - pagesToShow + 1)
-    }
-
-    // On mobile, simplify the logic - no ellipsis on very small screens
-    if (isMobile && window.innerWidth < 480) {
-      // Very simple pagination for tiny screens
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i)
-      }
-      return pages
+      startPage = Math.max(1, totalPages - showPages + 1)
     }
 
     // Add first page and ellipsis if needed
@@ -126,112 +93,6 @@ const MyPostsPagination = ({
     return null
   }
 
-  // Mobile-first responsive design
-  if (isMobile) {
-    return (
-      <div className='flex flex-col items-center space-y-3'>
-        {/* Mobile: Simple pagination with prev/next and current page info */}
-        <div className='flex items-center justify-center space-x-2'>
-          {/* Previous Button */}
-          <button
-            onClick={handlePrevious}
-            disabled={!hasPrev}
-            className='px-3 py-2 text-sm font-medium text-gray-600 bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-lg hover:bg-white/80 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
-            title='Previous page'
-          >
-            <svg
-              className='w-4 h-4'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth='2'
-                d='M15 19l-7-7 7-7'
-              />
-            </svg>
-          </button>
-
-          {/* Page Numbers - Limited for mobile */}
-          <div className='flex items-center space-x-1'>
-            {pageNumbers.map((page, index) => (
-              <button
-                key={index}
-                onClick={() => handlePageClick(page)}
-                disabled={page === '...' || page === currentPage}
-                className={`
-                  px-2 py-2 text-sm font-medium rounded-lg transition-all duration-200 min-w-[32px]
-                  ${
-                    page === currentPage
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                      : page === '...'
-                      ? 'text-gray-400 cursor-default bg-transparent'
-                      : 'text-gray-600 bg-white/60 backdrop-blur-sm border border-gray-200/50 hover:bg-white/80 hover:text-blue-600 hover:border-blue-300'
-                  }
-                `}
-                title={page === '...' ? '' : `Go to page ${page}`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
-          {/* Next Button */}
-          <button
-            onClick={handleNext}
-            disabled={!hasNext}
-            className='px-3 py-2 text-sm font-medium text-gray-600 bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-lg hover:bg-white/80 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
-            title='Next page'
-          >
-            <svg
-              className='w-4 h-4'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth='2'
-                d='M9 5l7 7-7 7'
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Mobile: Page Info */}
-        <div className='text-sm text-gray-600 bg-white/40 backdrop-blur-sm px-3 py-2 rounded-lg'>
-          Page {currentPage} of {totalPages}
-        </div>
-
-        {/* Mobile: Quick jump to first/last (only show if not on first/last) */}
-        {(currentPage !== 1 || currentPage !== totalPages) && (
-          <div className='flex items-center space-x-2'>
-            {currentPage !== 1 && (
-              <button
-                onClick={handleFirst}
-                className='text-xs px-2 py-1 text-blue-600 bg-blue-50 rounded border border-blue-200 hover:bg-blue-100 transition-colors'
-              >
-                First
-              </button>
-            )}
-            {currentPage !== totalPages && (
-              <button
-                onClick={handleLast}
-                className='text-xs px-2 py-1 text-blue-600 bg-blue-50 rounded border border-blue-200 hover:bg-blue-100 transition-colors'
-              >
-                Last
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // Desktop version (original layout)
   return (
     <div className='flex items-center justify-center space-x-2'>
       {/* First Page Button */}
